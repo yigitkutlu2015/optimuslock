@@ -1,0 +1,26 @@
+# Linux (Pardus) tarafı için Tailscale yan konteyneri.
+# Host ağını kullanır; böylece tailscale0 arayüzü Pardus'ta görünür ve
+# Optimuslock bu IP üzerinde dinleyebilir / bağlanabilir.
+#
+# Kullanım:
+#   cp .env.example .env     # TS_AUTHKEY değerini yaz
+#   docker compose up -d
+services:
+  tailscale:
+    image: tailscale/tailscale:stable
+    container_name: optimuslock-tailscale
+    hostname: ${TS_HOSTNAME:-optimuslock-pc}
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ./ts-state:/var/lib/tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_HOSTNAME=${TS_HOSTNAME:-optimuslock-pc}
+    restart: unless-stopped
