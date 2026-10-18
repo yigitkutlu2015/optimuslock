@@ -1,5 +1,5 @@
 # Optimuslock
-**Yayıncı: cykbilişim** · cykdigital@outlook.com.tr
+**Yayıncı: CYK Bilişim** · cykdigital@outlook.com.tr
 
 BT sınıfı için pencere tabanlı (tarayıcı gerektirmeyen) bilgisayar izleme, kilitleme ve yönetim programı.
 Pardus/Linux ve Windows'ta çalışır. Python + PySide6.
