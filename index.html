@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optimuslock — BT sınıfı için bilgisayar izleme ve yönetim yazılımı</title>
+<meta name="description" content="Optimuslock; Pardus ve Windows için pencere tabanlı sınıf yönetim yazılımı. Ekran izleme, kilitleme, uygulama/web engelleme, uzaktan müdahale ve kablolu/kablosuz karışık ağ desteği.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231e66f5'/%3E%3Ctext x='32' y='45' font-family='Arial' font-size='38' font-weight='bold' fill='white' text-anchor='middle'%3EO%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1220;
+    --bg-raised:#111b30;
+    --bg-card:#141f38;
+    --line:#223052;
+    --text:#eef2fb;
+    --text-dim:#aab6d1;
+    --text-faint:#728099;
+    --accent:#4c8dff;
+    --accent-soft:#1e66f5;
+    --amber:#f2b134;
+    --green:#3fcf8e;
+    --radius:10px;
+    --wrap:1120px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 560px at 82% -10%, #16224a 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 15%, #122039 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    letter-spacing:-0.01em;
+    margin:0;
+    color:#fff;
+  }
+  p{margin:0;}
+  a{color:inherit;}
+  code, .mono{font-family:'IBM Plex Mono', monospace;}
+  .wrap{max-width:var(--wrap); margin:0 auto; padding:0 28px;}
+  .dim{color:var(--text-dim);}
+  .faint{color:var(--text-faint);}
+
+  /* ---------- Nav ---------- */
+  header.site{
+    position:sticky; top:0; z-index:40;
+    background:rgba(11,18,32,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    max-width:var(--wrap); margin:0 auto; padding:16px 28px;
+    display:flex; align-items:center; justify-content:space-between; gap:24px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-family:'Manrope'; font-weight:800; font-size:18px; color:#fff;}
+  .brand .mark{
+    width:30px; height:30px; border-radius:8px;
+    background:linear-gradient(145deg, var(--accent), var(--accent-soft));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Manrope'; font-weight:800; font-size:16px; color:#fff;
+    box-shadow:0 4px 14px rgba(30,102,245,0.35);
+  }
+  .navlinks{display:flex; gap:28px; font-size:14.5px; font-weight:500;}
+  .navlinks a{color:var(--text-dim); text-decoration:none; transition:color .15s;}
+  .navlinks a:hover{color:#fff;}
+  .nav-cta{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--accent-soft); color:#fff; text-decoration:none;
+    padding:9px 16px; border-radius:7px; font-size:14px; font-weight:600;
+    box-shadow:0 1px 0 rgba(255,255,255,0.08) inset;
+  }
+  .navtoggle{display:none;}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:76px 0 64px;}
+  .hero-grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13.5px; color:var(--amber); font-weight:600;
+    margin-bottom:18px;
+  }
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--amber);}
+  h1.headline{font-size:46px; line-height:1.08;}
+  h1.headline .accent{color:var(--accent);}
+  .sub{margin-top:20px; font-size:17.5px; color:var(--text-dim); max-width:48ch;}
+  .cta-row{display:flex; gap:12px; margin-top:32px; flex-wrap:wrap;}
+  .btn{
+    display:inline-flex; align-items:center; gap:9px;
+    padding:13px 22px; border-radius:8px; font-size:15px; font-weight:600;
+    text-decoration:none; border:1px solid transparent; cursor:pointer;
+  }
+  .btn-primary{background:var(--accent-soft); color:#fff; box-shadow:0 8px 24px rgba(30,102,245,.35);}
+  .btn-primary:hover{background:#1a5ae0;}
+  .btn-ghost{background:transparent; color:var(--text); border-color:var(--line);}
+  .btn-ghost:hover{border-color:#3a4a73; background:rgba(255,255,255,.02);}
+  .hero-foot{margin-top:22px; font-size:13.5px; color:var(--text-faint);}
+
+  /* network diagram */
+  .diagram{position:relative;}
+  .diagram svg{width:100%; height:auto; display:block;}
+  .diagram-caption{
+    display:flex; gap:22px; justify-content:center; margin-top:14px;
+    font-size:12.5px; color:var(--text-faint);
+  }
+  .diagram-caption span{display:inline-flex; align-items:center; gap:7px;}
+  .lg-line{width:16px; height:2px; background:var(--accent); display:inline-block;}
+  .lg-dash{width:16px; height:2px; background:repeating-linear-gradient(90deg, var(--amber) 0 4px, transparent 4px 7px); display:inline-block;}
+
+  /* ---------- Trust strip ---------- */
+  .strip{border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--bg-raised);}
+  .strip-grid{
+    max-width:var(--wrap); margin:0 auto; padding:30px 28px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:28px;
+  }
+  .strip-item{font-size:14.5px; color:var(--text-dim); display:flex; gap:12px;}
+  .strip-item b{display:block; color:#fff; font-family:'Manrope'; font-weight:700; font-size:15px; margin-bottom:2px;}
+  .strip-item .ico{flex:none; width:20px; height:20px; margin-top:2px; color:var(--accent);}
+
+  /* ---------- Section shell ---------- */
+  section{padding:88px 0;}
+  .section-head{max-width:640px; margin-bottom:48px;}
+  .kicker{color:var(--accent); font-weight:600; font-size:13.5px; margin-bottom:10px;}
+  h2.h2{font-size:32px;}
+  .section-head p{margin-top:14px; color:var(--text-dim); font-size:16px;}
+
+  /* ---------- Feature groups ---------- */
+  .fgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  .fgroup{background:var(--bg-card); padding:30px 32px;}
+  .fgroup h3{font-size:17px; color:#fff; margin-bottom:6px;}
+  .fgroup .tag{font-size:12px; color:var(--amber); font-weight:600; margin-bottom:12px; display:block;}
+  .fgroup ul{list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:11px;}
+  .fgroup li{font-size:14.5px; color:var(--text-dim); padding-left:18px; position:relative;}
+  .fgroup li::before{content:""; position:absolute; left:0; top:8px; width:6px; height:6px; border-radius:50%; background:var(--accent);}
+
+  /* ---------- Compare table ---------- */
+  .tablewrap{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  table.cmp{width:100%; border-collapse:collapse; font-size:14.5px;}
+  table.cmp th, table.cmp td{text-align:left; padding:16px 20px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table.cmp thead th{background:var(--bg-raised); color:#fff; font-family:'Manrope'; font-weight:700; font-size:14px;}
+  table.cmp tbody th{color:#fff; font-weight:600; width:200px; background:var(--bg-card);}
+  table.cmp td{color:var(--text-dim);}
+  table.cmp tr:last-child td, table.cmp tr:last-child th{border-bottom:none;}
+  .pill{display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:20px; margin-left:8px;}
+  .pill-new{background:rgba(63,207,142,.15); color:var(--green); border:1px solid rgba(63,207,142,.35);}
+
+  /* ---------- Security ---------- */
+  .sec-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:36px 48px;}
+  .sec-item{display:flex; gap:16px;}
+  .sec-item .num{font-family:'IBM Plex Mono'; font-size:13px; color:var(--text-faint); padding-top:3px;}
+  .sec-item h3{font-size:16px; margin-bottom:6px;}
+  .sec-item p{font-size:14.5px; color:var(--text-dim);}
+
+  /* ---------- Requirements ---------- */
+  .req-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  .req-card{background:var(--bg-card); padding:28px 30px;}
+  .req-card h3{font-size:16px; margin-bottom:14px; display:flex; align-items:center; gap:10px;}
+  .req-card ul{margin:0; padding-left:18px; color:var(--text-dim); font-size:14px; display:flex; flex-direction:column; gap:7px;}
+
+  /* ---------- Download ---------- */
+  .dl-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  .dl-card{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px 28px 26px;
+  }
+  .dl-card .role{font-size:12.5px; font-weight:600; color:var(--amber); margin-bottom:8px;}
+  .dl-card h3{font-size:19px; margin-bottom:8px;}
+  .dl-card p{font-size:14px; color:var(--text-dim); margin-bottom:20px;}
+  .dl-buttons{display:flex; flex-direction:column; gap:9px;}
+  .dl-btn{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:11px 14px; border-radius:7px; border:1px solid var(--line);
+    text-decoration:none; color:var(--text); font-size:13.5px; font-weight:500;
+    background:rgba(255,255,255,.015);
+    transition:border-color .15s, background .15s;
+  }
+  .dl-btn:hover{border-color:var(--accent); background:rgba(76,141,255,.07);}
+  .dl-btn .plat{display:flex; align-items:center; gap:10px;}
+  .dl-btn .ext{font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--text-faint);}
+  .dl-note{
+    margin-top:28px; font-size:13.5px; color:var(--text-faint);
+    border-top:1px solid var(--line); padding-top:22px;
+  }
+  .dl-note code{background:var(--bg-raised); padding:2px 6px; border-radius:4px; font-size:12.5px;}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--line); padding:44px 0 36px;}
+  .foot-grid{display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:24px;}
+  .foot-brand{font-family:'Manrope'; font-weight:800; font-size:16px; color:#fff;}
+  .foot-links{display:flex; gap:22px; font-size:13.5px; color:var(--text-dim);}
+  .foot-links a{text-decoration:none;}
+  .foot-links a:hover{color:#fff;}
+  .foot-copy{font-size:12.5px; color:var(--text-faint); margin-top:18px;}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:860px){
+    .navlinks{display:none;}
+    .hero-grid{grid-template-columns:1fr; gap:40px;}
+    h1.headline{font-size:36px;}
+    .strip-grid{grid-template-columns:1fr; gap:18px;}
+    .fgrid, .req-grid{grid-template-columns:1fr;}
+    .sec-grid{grid-template-columns:1fr;}
+    .dl-grid{grid-template-columns:1fr;}
+    table.cmp thead{display:none;}
+    table.cmp, table.cmp tbody, table.cmp tr, table.cmp th, table.cmp td{display:block; width:auto;}
+    table.cmp tr{padding:14px 20px; border-bottom:1px solid var(--line);}
+    table.cmp th, table.cmp td{border:none; padding:3px 0;}
+    section{padding:60px 0;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav>
+    <div class="brand"><span class="mark">O</span>Optimuslock</div>
+    <div class="navlinks">
+      <a href="#ozellikler">Özellikler</a>
+      <a href="#baglanti">Bağlantı</a>
+      <a href="#guvenlik">Güvenlik</a>
+      <a href="#gereksinimler">Gereksinimler</a>
+    </div>
+    <a class="nav-cta" href="#indir">İndir</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow"><span class="dot"></span>Pardus ve Windows için BT sınıfı yazılımı</div>
+      <h1 class="headline">Sınıftaki her bilgisayarı,<br><span class="accent">tek ekrandan</span> yönetin.</h1>
+      <p class="sub">Optimuslock; öğretmen bilgisayarından tüm sınıfı izlemenizi, kilitlemenizi ve yönetmenizi sağlayan pencere tabanlı bir kontrol sistemidir. Kablolu ve kablosuz bilgisayarlar farklı ağda olsa bile.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#indir">İndirmeyi başlat</a>
+        <a class="btn btn-ghost" href="#ozellikler">Özellikleri incele</a>
+      </div>
+      <div class="hero-foot">cykbilişim tarafından geliştirilir · Pardus 23/25 ve Windows 10/11 için</div>
+    </div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 440 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- bağlantı çizgileri -->
+        <g stroke-width="2">
+          <line x1="220" y1="170" x2="90" y2="70" stroke="#4c8dff"/>
+          <line x1="220" y1="170" x2="220" y2="50" stroke="#4c8dff"/>
+          <line x1="220" y1="170" x2="350" y2="70" stroke="#4c8dff"/>
+          <line x1="220" y1="170" x2="70" y2="260" stroke="#f2b134" stroke-dasharray="5 6"/>
+          <line x1="220" y1="170" x2="220" y2="300" stroke="#f2b134" stroke-dasharray="5 6"/>
+          <line x1="220" y1="170" x2="370" y2="260" stroke="#f2b134" stroke-dasharray="5 6"/>
+        </g>
+        <!-- öğretmen (merkez) düğümü -->
+        <circle cx="220" cy="170" r="30" fill="#141f38" stroke="#4c8dff" stroke-width="2"/>
+        <rect x="207" y="159" width="26" height="18" rx="2" fill="#4c8dff"/>
+        <rect x="211" y="179" width="18" height="3" rx="1.5" fill="#4c8dff"/>
+        <!-- kablolu öğrenciler -->
+        <g>
+          <circle cx="90" cy="70" r="20" fill="#111b30" stroke="#4c8dff" stroke-width="1.6"/>
+          <circle cx="220" cy="50" r="20" fill="#111b30" stroke="#4c8dff" stroke-width="1.6"/>
+          <circle cx="350" cy="70" r="20" fill="#111b30" stroke="#4c8dff" stroke-width="1.6"/>
+        </g>
+        <!-- kablosuz öğrenciler -->
+        <g>
+          <circle cx="70" cy="260" r="20" fill="#111b30" stroke="#f2b134" stroke-width="1.6"/>
+          <circle cx="220" cy="300" r="20" fill="#111b30" stroke="#f2b134" stroke-width="1.6"/>
+          <circle cx="370" cy="260" r="20" fill="#111b30" stroke="#f2b134" stroke-width="1.6"/>
+        </g>
+        <text x="220" y="340" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#728099">okul sunucusu: kablolu + kablosuz tek listede</text>
+      </svg>
+      <div class="diagram-caption">
+        <span><i class="lg-line"></i>Kablolu bağlantı</span>
+        <span><i class="lg-dash"></i>Kablosuz / farklı alt ağ</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="strip">
+  <div class="strip-grid">
+    <div class="strip-item">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <div><b>Pencere tabanlı</b>Tarayıcı veya ek bir hesap gerekmez; kurulum sihirbazıyla açılır.</div>
+    </div>
+    <div class="strip-item">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      <div><b>Uçtan uca şifreli</b>Tüm trafik sınıf anahtarıyla şifrelenir ve doğrulanır.</div>
+    </div>
+    <div class="strip-item">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <div><b>Şeffaf çalışır</b>Öğrenci tarafında durum her zaman görünür; sessiz izleme yoktur.</div>
+    </div>
+  </div>
+</div>
+
+<section id="ozellikler">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Özellikler</div>
+      <h2 class="h2">Sınıf yönetimi için ihtiyacınız olan her şey</h2>
+      <p>Dört grupta toplanan özellikler; izlemeden kısıtlamaya, bağlantıdan idari işlere kadar tüm sınıf akışını kapsar.</p>
+    </div>
+
+    <div class="fgrid">
+      <div class="fgroup">
+        <span class="tag">İzleme ve müdahale</span>
+        <h3>Ekranı görün, gerekirse siz kullanın</h3>
+        <ul>
+          <li>Tüm öğrencilerin canlı ekran küçük resimleri, çift tıkla büyük görünüm</li>
+          <li>Büyük görünümde "Kontrolü Al" ile öğrencinin fare ve klavyesini kullanma</li>
+          <li>Öğretmen ekranını tüm sınıfa yayınlama (ekran paylaşımı)</li>
+          <li>Açık uygulama listesini anlık görüntüleme</li>
+        </ul>
+      </div>
+      <div class="fgroup">
+        <span class="tag">Kısıtlama</span>
+        <h3>Dikkat dağıtanları kapatın</h3>
+        <ul>
+          <li>Tüm monitörleri kaplayan tam ekran kilit, isteğe bağlı mesajla</li>
+          <li>Program adına göre uygulama engelleme</li>
+          <li>Web sitesi engelleme — izin kurulum sırasında otomatik verilir</li>
+          <li>Uzaktan kapatma, yeniden başlatma ve oturum kapatma</li>
+        </ul>
+      </div>
+      <div class="fgroup">
+        <span class="tag">Bağlantı</span>
+        <h3>Ağınıza uyan yöntemi seçin</h3>
+        <ul>
+          <li>IP adresi + okul sunucusu: kablolu/kablosuz farklı alt ağları otomatik birleştirir</li>
+          <li>Tailscale ile şifreli, uzaktan erişilebilir özel ağ</li>
+          <li>Cloudflare Tunnel ile port açmadan bağlantı</li>
+          <li>Wake-on-LAN ile kapalı bilgisayarları uyandırma</li>
+        </ul>
+      </div>
+      <div class="fgroup">
+        <span class="tag">Yönetim</span>
+        <h3>Kurulumdan güne kadar</h3>
+        <ul>
+          <li>Tek kurulum sihirbazı; öğretmen/öğrenci paketleri ayrı, rol sorulmaz</li>
+          <li>E-posta ile kurulum daveti ve öğretmen hesabıyla panele giriş</li>
+          <li>Dosya ve mesaj gönderme</li>
+          <li>Güncelleme denetimi ve (AppImage'de) yerinde güncelleme</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="baglanti">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Bağlantı yöntemleri</div>
+      <h2 class="h2">Okulunuzun ağına göre üç yol</h2>
+      <p>Hepsi aynı sınıf anahtarıyla şifrelenir; aradaki fark yalnızca öğrenci bilgisayarlarına nasıl ulaşıldığıdır.</p>
+    </div>
+    <div class="tablewrap">
+      <table class="cmp">
+        <thead>
+          <tr><th>Yöntem</th><th>En uygun olduğu durum</th><th>Kurulum</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>IP + okul sunucusu <span class="pill pill-new">yeni</span></th>
+            <td>Aynı okul ağında kablolu ve kablosuz bilgisayarlar karışık. Öğrenci kendini öğretmene otomatik bildirir, tarama gerekmez.</td>
+            <td>Ek yazılım gerekmez</td>
+          </tr>
+          <tr>
+            <th>Tailscale</th>
+            <td>Farklı ağlardan veya uzaktan erişim gereken kurulumlar. Şifreli özel ağ, IP değişse de çalışır.</td>
+            <td>Docker ile otomatik veya yerel uygulama</td>
+          </tr>
+          <tr>
+            <th>Cloudflare Tunnel</th>
+            <td>Güvenlik duvarında port açmak istemeyen okullar; öğrenci kendi tünelini yayınlar.</td>
+            <td>Docker veya <span class="mono">cloudflared</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="guvenlik">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Güvenlik ve şeffaflık</div>
+      <h2 class="h2">İzleme yazılımı, güven gerektirir</h2>
+      <p>Optimuslock, öğrencinin bilgisayarında ne olduğunu gizlemez ve yetkisiz erişimi sınıf anahtarıyla engeller.</p>
+    </div>
+    <div class="sec-grid">
+      <div class="sec-item">
+        <span class="num">01</span>
+        <div><h3>Sınıf anahtarıyla şifreleme</h3><p>Öğretmen ve öğrenci arasındaki tüm trafik, yalnızca sizin bildiğiniz anahtarla şifrelenir ve doğrulanır; anahtarı bilmeyen bağlanamaz.</p></div>
+      </div>
+      <div class="sec-item">
+        <span class="num">02</span>
+        <div><h3>Görünür durum</h3><p>Öğrenci bilgisayarında program her zaman görünür çalışır; gizli bir arka plan süreci değildir.</p></div>
+      </div>
+      <div class="sec-item">
+        <span class="num">03</span>
+        <div><h3>Yerel öğretmen hesabı</h3><p>Panel girişi bu bilgisayara özgü bir hesapla korunur; bilgiler bulutta saklanmaz.</p></div>
+      </div>
+      <div class="sec-item">
+        <span class="num">04</span>
+        <div><h3>Korumalı kaldırma</h3><p>Programı kapatmak serbesttir; yalnızca kaldırmak sınıf anahtarını ister.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gereksinimler">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Sistem gereksinimleri</div>
+      <h2 class="h2">İki platformda da aynı kontrol paneli</h2>
+    </div>
+    <div class="req-grid">
+      <div class="req-card">
+        <h3>🐧 Pardus / Linux</h3>
+        <ul>
+          <li>Pardus 23/25, Debian 12/13 veya Ubuntu 22.04+</li>
+          <li>Ekran yakalama ve kilit için X11 oturumu (Wayland'de XWayland üzerinden)</li>
+          <li><span class="mono">.deb</span> paketi veya tek dosyalık AppImage</li>
+        </ul>
+      </div>
+      <div class="req-card">
+        <h3>🪟 Windows</h3>
+        <ul>
+          <li>Windows 10 (1703+) veya Windows 11, 64 bit</li>
+          <li>Kurulum dosyası yönetici onayı ister</li>
+          <li>Python ve arayüz kütüphaneleri pakete gömülüdür</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="indir">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">İndir</div>
+      <h2 class="h2">Öğretmen ve öğrenci için ayrı paketler</h2>
+      <p>Her paket kendi rolünü bilir; kurulum sihirbazı rol sormadan doğrudan bağlantı ayarlarıyla başlar.</p>
+    </div>
+    <div class="dl-grid">
+      <div class="dl-card">
+        <div class="role">ÖĞRETMEN BİLGİSAYARI</div>
+        <h3>İzleme ve yönetim paneli</h3>
+        <p>Sınıfı görüntüleyip yönettiğiniz ana uygulama. Okul sunucusu bu bilgisayarda otomatik çalışır.</p>
+        <div class="dl-buttons">
+          <a class="dl-btn" href="https://github.com/yigitkutlu2015/optimuslock/releases/download/%23optimuslock/Optimuslock-Setup-1.3.0.exe">
+            <span class="plat">🪟 Windows kurulum dosyası</span><span class="ext">.exe</span>
+          </a>
+          <a class="dl-btn" href="https://github.com/yigitkutlu2015/optimuslock/releases/download/%23optimuslock/optimuslock-teacher_1.3.0_all.deb">
+            <span class="plat">🐧 Pardus / Debian paketi</span><span class="ext">.deb</span>
+          </a>
+        </div>
+      </div>
+      <div class="dl-card">
+        <div class="role">ÖĞRENCİ BİLGİSAYARI</div>
+        <h3>Sınıf ajanı</h3>
+        <p>Öğretmenin izleyip yönetebildiği, sistem tepsisinde görünür çalışan taraf.</p>
+        <div class="dl-buttons">
+          <a class="dl-btn" href="https://github.com/yigitkutlu2015/optimuslock/releases/download/%23optimuslock/Optimuslock-Setup-1.3.0.exe">
+            <span class="plat">🪟 Windows kurulum dosyası</span><span class="ext">.exe</span>
+          </a>
+          <a class="dl-btn" href="https://github.com/yigitkutlu2015/optimuslock/releases/download/%23optimuslock/optimuslock-student_1.3.0_all.deb">
+            <span class="plat">🐧 Pardus / Debian paketi</span><span class="ext">.deb</span>
+          </a>
+          <a class="dl-btn" href="https://github.com/yigitkutlu2015/optimuslock/releases/download/%23optimuslock/optimuslock-linux-full-setup.zip">
+            <span class="plat">📦 Tek dosya (AppImage, Pardus)</span><span class="ext">.zip</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <p class="dl-note">Windows kurulum dosyası tek bir <code>.exe</code> içinde hem öğretmen hem öğrenci rolünü barındırır; rol sihirbazda seçilir. Kaynak kod ve paket derleme betikleri GitHub deposunda yer alır.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">Optimuslock</div>
+        <div class="foot-copy">© 2026 cykbilişim · Tüm hakları saklıdır</div>
+      </div>
+      <div class="foot-links">
+        <a href="https://github.com/cykbilisim/optimuslock">GitHub deposu</a>
+        <a href="https://github.com/cykbilisim/optimuslock/releases">Sürümler</a>
+        <a href="mailto:cykdigital@outlook.com.tr">cykdigital@outlook.com.tr</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
